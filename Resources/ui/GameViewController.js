@@ -89,8 +89,7 @@ Ti.API.info('Including GameViewController.js');
 	var checkForWin = function(){
 		var lines = mttt.app.gvc.lines;
 		var btns = mttt.app.gvc.buttons;
-		var x;
-		for(x=0;x < lines.length; x++){
+		for(var x in lines){
 			var index1 = lines[x][0];
 			var index2 = lines[x][1];
 			var index3 = lines[x][2];
@@ -111,6 +110,7 @@ Ti.API.info('Including GameViewController.js');
 			var btn = mttt.app.gvc.buttons[i];
 			btn.backgroundImage = '/images/leer.png';
 			btn.backgroundDisabledImage = '/images/leer.png';
+			btn.owner = null;
 		}
 		mttt.app.gvc.endLabel.text = "Spieler 1 ist dran";
 	}
