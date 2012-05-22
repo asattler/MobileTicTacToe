@@ -27,7 +27,7 @@ Ti.API.info('Including GameViewController.js');
 	var grid = [];
 	var handleClick = function(_e) {
 		if(numTurn >= 9){
-			gameEnd();	
+			gameEnd(null);	
 		}
 		var lastTurn = mttt.app.gvc.turn || 0;
 		var testen = _e;
@@ -50,33 +50,41 @@ Ti.API.info('Including GameViewController.js');
 		mttt.app.gvc.buttons[index-1].backgroundImage = image;
 		mttt.app.gvc.buttons[index-1].backgroundDisabledImage = image;
 		mttt.app.gvc.buttons[index-1].enabled = false;
-		mttt.app.gvc.buttons[index-1].owner = (image == kreuzImg) ? "Spieler 1" : "Spieler 2";
+		mttt.app.gvc.buttons[index-1].owner = ((image == kreuzImg) ? "Spieler 1" : "Spieler 2");
 		mttt.app.gvc.turn = lastTurn+1;
 		
 		grid[index-1] = image;
 		
-		if(checkForWin() != null){
-			gameEnd(image);
+		var win = checkForWin();
+		if(win != null){
+			gameEnd(win);
+		}else {
+			
+			mttt.app.gvc.endLabel.text = statusText;
+			
+			numTurn++;
 		}
-		
-		mttt.app.gvc.endLabel.text = statusText;
-		
-		numTurn++;
 	}
 	
-	var gameEnd = function(image){
+	var gameEnd = function(win){
 		var winner;
-		// spieler 2
-		if(image == kreisImg){
-			winner = "Spieler 2";
-		}
-		//spieler 1
-		else if(image == kreuzImg){
-			winner = "Spieler 1";
-		}
-		//draw
-		else {
+		if(win == null){
 			winner = "Niemand";
+		}
+		else {
+			winner = win.winner;
+			var image;
+			var btns = mttt.app.gvc.buttons;
+			if(winner == "Spieler 1"){
+				image = kreuzWinImg;
+			} else {
+				image = kreisWinImg;
+			}
+			//works fine, if its not shown your emulator needs to long to render!
+			for(var i = 0; i<win.line.length;i++){
+				btns[win.line[i]-1].backgroundImage = image;
+				btns[win.line[i]-1].backgroundDisabledImage = image;
+			}
 		}
 		
 		var text = winner+" hat gewonnen";
@@ -89,16 +97,16 @@ Ti.API.info('Including GameViewController.js');
 	var checkForWin = function(){
 		var lines = mttt.app.gvc.lines;
 		var btns = mttt.app.gvc.buttons;
-		for(var x in lines){
+		var x;
+		for(x=0;x < lines.length; x++){
 			var index1 = lines[x][0];
 			var index2 = lines[x][1];
 			var index3 = lines[x][2];
-			alert(btns[index1-1].owner +" : "+ btns[index2-1].owner +" : "+ btns[index3-1].owner);
 			if(btns[index1-1].owner == null || btns[index2-1].owner == null || btns[index3-1].owner == null){ 
-				return null;
+				continue;
 			}
 			if(btns[index1-1].owner == btns[index2-1].owner && btns[index2-1].owner == btns[index3-1].owner){
-				return {line:lines[x], winner:btns[index1].owner};
+				return {line:lines[x], winner:btns[index1-1].owner};
 			}
 		}
 		return null;		
@@ -106,6 +114,7 @@ Ti.API.info('Including GameViewController.js');
 	
 	
 	var resetGame = function(){
+		numTurn = 1;
 		for (var i=0;i < mttt.app.gvc.buttons.length;i++){
 			var btn = mttt.app.gvc.buttons[i];
 			btn.backgroundImage = '/images/leer.png';
@@ -120,14 +129,14 @@ Ti.API.info('Including GameViewController.js');
   		var gvc = {};
   		var buttons = [];
   		var lines = [];
-		lines[0] = [1,2,3];
-		lines[1] = [4,5,6];
-		lines[2] = [7,8,9];
-		lines[3] = [1,4,7];
-		lines[4] = [2,5,8];
-		lines[5] = [3,6,9];
-		lines[6] = [1,5,9];
-		lines[7] = [3,5,7];
+  		lines.push([1,2,3]);
+		lines.push([4,5,6]);
+		lines.push([7,8,9]);
+		lines.push([1,4,7]);
+		lines.push([2,5,8]);
+		lines.push([3,6,9]);
+		lines.push([1,5,9]);
+		lines.push([3,5,7]);
 		
 		gvc.attachToTab = attachToTab;
 		gvc.handleClick = handleClick;
