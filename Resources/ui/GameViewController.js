@@ -89,14 +89,16 @@ Ti.API.info('Including GameViewController.js');
 	var checkForWin = function(){
 		var lines = mttt.app.gvc.lines;
 		var btns = mttt.app.gvc.buttons;
-		for(var x=0;x < lines.length; x++){
+		var x;
+		for(x=0;x < lines.length; x++){
 			var index1 = lines[x][0];
 			var index2 = lines[x][1];
 			var index3 = lines[x][2];
-			if(btns[index1].owner == null || btns[index2].owner == null || btns[index3].owner == null){ 
+			alert(btns[index1-1].owner +" : "+ btns[index2-1].owner +" : "+ btns[index3-1].owner);
+			if(btns[index1-1].owner == null || btns[index2-1].owner == null || btns[index3-1].owner == null){ 
 				return null;
 			}
-			if(btns[index1].owner == btns[index2].owner && btns[index2].owner == btns[index3].owner){
+			if(btns[index1-1].owner == btns[index2-1].owner && btns[index2-1].owner == btns[index3-1].owner){
 				return {line:lines[x], winner:btns[index1].owner};
 			}
 		}
