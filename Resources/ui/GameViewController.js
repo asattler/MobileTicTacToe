@@ -10,21 +10,20 @@ Ti.API.info('Including GameViewController.js');
 	var numTurn = 1;
 	
 	var attachToTab = function(_tab) {
-		
 		var oneWindow = _tab.window;
-		var children = oneWindow.children;
-		var childCount = children.length;
+		var children = Ti.Platform.osname==='android'?oneWindow._children:oneWindow.children;
 		
-		for (var index = 0; index < childCount; index += 1)
+		for (var index = 0; index < children.length; index += 1)
 		{
 			var oneChild = children[index];
 		    oneWindow.remove(oneChild);
 		}
-		
+				
 		oneWindow.add(this.view);
 	};
 
 	var grid = [];
+	
 	var handleClick = function(_e) {
 		if(numTurn >= 9){
 			gameEnd(null);	
@@ -43,10 +42,7 @@ Ti.API.info('Including GameViewController.js');
 			 image=kreuzImg;
 			 statusText = "Spieler 2 ist dran";
 		}
-		
-		
-		
-				
+						
 		mttt.app.gvc.buttons[index-1].backgroundImage = image;
 		mttt.app.gvc.buttons[index-1].backgroundDisabledImage = image;
 		mttt.app.gvc.buttons[index-1].enabled = false;
@@ -59,9 +55,7 @@ Ti.API.info('Including GameViewController.js');
 		if(win != null){
 			gameEnd(win);
 		}else {
-			
 			mttt.app.gvc.endLabel.text = statusText;
-			
 			numTurn++;
 		}
 	}
@@ -119,6 +113,7 @@ Ti.API.info('Including GameViewController.js');
 			var btn = mttt.app.gvc.buttons[i];
 			btn.backgroundImage = '/images/leer.png';
 			btn.backgroundDisabledImage = '/images/leer.png';
+			btn.enabled = true;
 			btn.owner = null;
 		}
 		mttt.app.gvc.endLabel.text = "Spieler 1 ist dran";
