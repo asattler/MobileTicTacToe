@@ -25,9 +25,7 @@ Ti.API.info('Including GameViewController.js');
 	var grid = [];
 	
 	var handleClick = function(_e) {
-		if(numTurn >= 9){
-			gameEnd(null);	
-		}
+		
 		var lastTurn = mttt.app.gvc.turn || 0;
 		var testen = _e;
 		var index = _e.source.index;
@@ -57,6 +55,10 @@ Ti.API.info('Including GameViewController.js');
 		}else {
 			mttt.app.gvc.endLabel.text = statusText;
 			numTurn++;
+		}
+		
+		if(numTurn > 9){
+			gameEnd(null);	
 		}
 	}
 	
