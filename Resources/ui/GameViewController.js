@@ -1,13 +1,18 @@
 Ti.API.info('Including GameViewController.js');
 
 (function() {
-	var kreuzImg = '/images/kreuz.png';
-	var kreuzWinImg = '/images/kreuz_g.png';
 	
-	var kreisImg = '/images/kreis.png';
-	var kreisWinImg = '/images/kreis_g.png';
+	var PlayerOne = {
+		name  : 'PLAYER ONE',
+        image : '/images/kreuz.png',
+		image_win   : '/images/kreuz_g.png',
+	};
 	
-	var numTurn = 1;
+	var PlayerTwo = {
+		name  : 'PLAYER TWO',
+        image : '/images/kreis.png',
+		image_win   : '/images/kreis_g.png',
+	};
 	
 	var attachToTab = function(_tab) {
 		var oneWindow = _tab.window;
@@ -22,73 +27,63 @@ Ti.API.info('Including GameViewController.js');
 		oneWindow.add(this.view);
 	};
 
-	var grid = [];
-	
 	var handleClick = function(_e) {
-		
-		var lastTurn = mttt.app.gvc.turn || 0;
-		var testen = _e;
 		var index = _e.source.index;
 		
-		var image;
-		var statusText;
-		if(lastTurn%2){
-			image=kreisImg;
-			statusText = "Spieler 1 ist dran";
-		}
-		else{
-			 image=kreuzImg;
-			 statusText = "Spieler 2 ist dran";
-		}
-						
-		mttt.app.gvc.buttons[index-1].backgroundImage = image;
-		mttt.app.gvc.buttons[index-1].backgroundDisabledImage = image;
+		mttt.app.gvc.buttons[index-1].backgroundImage = mttt.app.gvc.currentPlayer.image;
+		mttt.app.gvc.buttons[index-1].backgroundDisabledImage = mttt.app.gvc.currentPlayer.image;
 		mttt.app.gvc.buttons[index-1].enabled = false;
-		mttt.app.gvc.buttons[index-1].owner = ((image == kreuzImg) ? "Spieler 1" : "Spieler 2");
-		mttt.app.gvc.turn = lastTurn+1;
-		
-		grid[index-1] = image;
+		mttt.app.gvc.buttons[index-1].owner = mttt.app.gvc.currentPlayer;
 		
 		var win = checkForWin();
 		if(win != null){
 			gameEnd(win);
 		}else {
-			mttt.app.gvc.endLabel.text = statusText;
-			numTurn++;
+			if(mttt.app.gvc.turn%2){
+				mttt.app.gvc.currentPlayer = PlayerOne;
+			}
+			else{
+	            mttt.app.gvc.currentPlayer = PlayerTwo;
+			}
+			mttt.app.gvc.turn++;
+			setPlayerTurnText(mttt.app.gvc.currentPlayer);
 		}
 		
-		if(numTurn > 9){
+		if(mttt.app.gvc.turn > 8){
 			gameEnd(null);	
 		}
 	}
 	
 	var gameEnd = function(win){
 		var winner;
-		if(win == null){
-			winner = "Niemand";
-		}
-		else {
+		var buttons = mttt.app.gvc.buttons;
+			
+		if(win != null){
 			winner = win.winner;
-			var image;
-			var btns = mttt.app.gvc.buttons;
-			if(winner == "Spieler 1"){
-				image = kreuzWinImg;
-			} else {
-				image = kreisWinImg;
-			}
-			//works fine, if its not shown your emulator needs to long to render!
+			
+			//works fine, if its not shown, your emulator needs to long to render!
 			for(var i = 0; i<win.line.length;i++){
-				btns[win.line[i]-1].backgroundImage = image;
-				btns[win.line[i]-1].backgroundDisabledImage = image;
+				buttons[win.line[i]-1].backgroundImage = winner.image_win;
+				buttons[win.line[i]-1].backgroundDisabledImage = winner.image_win;
 			}
 		}
 		
-		var text = winner+" hat gewonnen";
+		for(var i = 0; i<buttons.length;i++){
+			buttons[i].enabled = false;
+		}
 		
-		alert(text);
-		resetGame();
+		setTimeout(function() {
+		    alert(winner?winner.name+" WINS":"DRAW");
+		    resetGame();
+		}, 2000);
+		
+		
 		
 	}
+	
+	var setStatusText = function(text){
+		mttt.app.gvc.endLabel.text = text;
+	};
 	
 	var checkForWin = function(){
 		var lines = mttt.app.gvc.lines;
@@ -108,9 +103,8 @@ Ti.API.info('Including GameViewController.js');
 		return null;		
 	}
 	
-	
 	var resetGame = function(){
-		numTurn = 1;
+		mttt.app.gvc.turn = 0;
 		for (var i=0;i < mttt.app.gvc.buttons.length;i++){
 			var btn = mttt.app.gvc.buttons[i];
 			btn.backgroundImage = '/images/leer.png';
@@ -118,14 +112,19 @@ Ti.API.info('Including GameViewController.js');
 			btn.enabled = true;
 			btn.owner = null;
 		}
-		mttt.app.gvc.endLabel.text = "Spieler 1 ist dran";
+		mttt.app.gvc.currentPlayer = PlayerOne;
+		setPlayerTurnText(mttt.app.gvc.currentPlayer);
 	}
-
+	
+	var setPlayerTurnText = function(player){
+		setStatusText(player.name+"S TURN");
+	}
+	
   	mttt.ui.createGameViewController = function(_args) {
-  		
   		var gvc = {};
   		var buttons = [];
   		var lines = [];
+  		
   		lines.push([1,2,3]);
 		lines.push([4,5,6]);
 		lines.push([7,8,9]);
@@ -170,18 +169,15 @@ Ti.API.info('Including GameViewController.js');
 			}
 		}
 		
-		// Create a Label.
 		var endLabel = Ti.UI.createLabel({
-			text : "Spieler 1 ist dran",
-			color : '#000000',
-			font : {fontSize:12},
+			color : mttt.config.labelColor,
+			font : {fontSize:18},
 			height : 20,
 			width : 200,
 			top : 0,
 			left : 0,
 			textAlign : 'center'
 		});
-		
 		
 		view.add(endLabel);
 
@@ -190,7 +186,7 @@ Ti.API.info('Including GameViewController.js');
 		gvc.buttons = buttons;
 		gvc.endLabel = endLabel;
 		gvc.view = view;
-	
+		gvc.resetGame = resetGame;
 	    return gvc;
 	};
 
