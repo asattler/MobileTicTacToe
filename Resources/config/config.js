@@ -10,7 +10,13 @@ mttt.config = {
 	buttonHeight: 60,
 	buttonDelta: 66,
 	buttonStartX: 100,
-	buttonStartY: 120
+	buttonStartY: 120,
+	settingsButtonWidth:100,
+	settingsButtonHeight:40,
+	kreisImg: '/images/kreis.png',
+	kreisImgG: '/images/kreis_g.png',
+	kreuzImg: '/images/kreuz.png',
+	kreuzImgG: '/images/kreuz_g.png',
 };
 
 Ti.API.info(mttt);

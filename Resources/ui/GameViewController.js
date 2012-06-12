@@ -2,19 +2,24 @@ Ti.API.info('Including GameViewController.js');
 
 (function() {
 	
-	var PlayerOne = {
-		name  : 'PLAYER ONE',
-        image : '/images/kreuz.png',
-		image_win   : '/images/kreuz_g.png',
-	};
+	var PlayerOne,PlayerTwo;
 	
-	var PlayerTwo = {
-		name  : 'PLAYER TWO',
-        image : '/images/kreis.png',
-		image_win   : '/images/kreis_g.png',
-	};
-	
+	var initPlayers = function(){
+		Ti.API.info(mttt.app.svc.settings);
+		PlayerOne = {
+			name  : mttt.app.svc.settings.player1.begin?mttt.app.svc.settings.player1.name:mttt.app.svc.settings.player2.name,
+	        image : mttt.app.svc.settings.player1.begin?mttt.app.svc.settings.player1.image:mttt.app.svc.settings.player2.image,
+			image_win   : mttt.app.svc.settings.player1.begin?mttt.app.svc.settings.player1.image_win:mttt.app.svc.settings.player2.image_win,
+		};
+		
+		PlayerTwo = {
+			name  : mttt.app.svc.settings.player1.begin?mttt.app.svc.settings.player2.name:mttt.app.svc.settings.player1.name,
+	        image : mttt.app.svc.settings.player1.begin?mttt.app.svc.settings.player2.image:mttt.app.svc.settings.player1.image,
+			image_win   : mttt.app.svc.settings.player1.begin?mttt.app.svc.settings.player2.image_win:mttt.app.svc.settings.player1.image_win,
+		};
+	}
 	var attachToTab = function(_tab) {
+		_tab.title = 'Game';
 		var oneWindow = _tab.window;
 		var children = Ti.Platform.osname==='android'?oneWindow._children:oneWindow.children;
 		
@@ -114,6 +119,13 @@ Ti.API.info('Including GameViewController.js');
 		}
 		mttt.app.gvc.currentPlayer = PlayerOne;
 		setPlayerTurnText(mttt.app.gvc.currentPlayer);
+		
+		// KI
+		initPlayers();
+		if(mttt.app.svc.settings.mode=='single' && PlayerOne.name == 'cpu'){
+			Ti.API.info(mttt.app.gvc.buttons);
+			mttt.app.gvc.buttons[0].fireEvent('click');
+		}
 	}
 	
 	var setPlayerTurnText = function(player){
@@ -121,6 +133,8 @@ Ti.API.info('Including GameViewController.js');
 	}
 	
   	mttt.ui.createGameViewController = function(_args) {
+  		initPlayers();
+  		
   		var gvc = {};
   		var buttons = [];
   		var lines = [];
@@ -180,7 +194,12 @@ Ti.API.info('Including GameViewController.js');
 		});
 		
 		view.add(endLabel);
-
+		
+		// KI
+		if(mttt.app.svc.settings.mode=='single' && PlayerOne.name == 'cpu'){
+			buttons[0].fireEvent('click');
+		}
+		
 //		var label = Ti.UI.createLabel({text:_args});
 		gvc.lines = lines;
 		gvc.buttons = buttons;
