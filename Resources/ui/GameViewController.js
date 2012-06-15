@@ -108,7 +108,6 @@ Ti.API.info('Including GameViewController.js');
 	var checkForWinningChance = function(gvc){
 		var currentPlayer = gvc.currentPlayer;
 		var lines = gvc.lines;
-		alert(lines);
 		var btns = gvc.buttons;
 		var x;
 		for(x=0;x < lines.length; x++){
