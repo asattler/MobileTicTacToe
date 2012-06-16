@@ -6,7 +6,7 @@ Ti.API.info('Including SettingsViewController.js');
 		var oneWindow = _tab.window;
 		var children = Ti.Platform.osname === 'android' ? oneWindow._children : oneWindow.children;
 
-		for(var index = 0; index < children.length; index += 1) {
+		for (var index = 0; index < children.length; index += 1) {
 			var oneChild = children[index];
 			oneWindow.remove(oneChild);
 		}
@@ -136,25 +136,24 @@ Ti.API.info('Including SettingsViewController.js');
 			returnKeyType : Ti.UI.RETURNKEY_DEFAULT,
 			borderStyle : Ti.UI.INPUT_BORDERSTYLE_ROUNDED
 		});
-		
-		
-		singleButton.addEventListener('click',function() {
+
+		singleButton.addEventListener('click', function() {
 			this.enabled = false;
 			settings.mode = 'single';
 			player1Button.title = 'CPU';
 			player2Button.title = 'User';
-			
+
 			settings.player1.begin = true;
 			settings.player2.begin = false;
-			
+
 			dualButton.enabled = true;
-			
+
 			settings.player1.name = "cpu";
 			settings.player2.name = "user";
-			
+
 			mttt.app.gvc.resetGame();
 		});
-		dualButton.addEventListener('click',function() {
+		dualButton.addEventListener('click', function() {
 			this.enabled = false;
 			settings.mode = 'dual';
 			player1Button.title = 'Player 1';
@@ -164,32 +163,48 @@ Ti.API.info('Including SettingsViewController.js');
 			settings.player2.name = "player 2";
 			mttt.app.gvc.resetGame();
 		});
-		userImage1.addEventListener('click',function() {
+		//userImage 1 == kreis
+		userImage1.addEventListener('click', function() {
 			this.enabled = false;
-			settings.player1.image = mttt.config.kreuzImg;
-			settings.player1.image_win = mttt.config.kreuzImgG;
-			settings.player2.image = mttt.config.kreisImg;
-			settings.player2.image_win = mttt.config.kreisImgG;
+			if (player1Button.enabled == false) {
+				settings.player1.image = mttt.config.kreisImg;
+				settings.player1.image_win = mttt.config.kreisImgG;
+				settings.player2.image = mttt.config.kreuzImg;
+				settings.player2.image_win = mttt.config.kreuzImgG;
+			} else {
+				settings.player1.image = mttt.config.kreuzImg;
+				settings.player1.image_win = mttt.config.kreuzImgG;
+				settings.player2.image = mttt.config.kreisImg;
+				settings.player2.image_win = mttt.config.kreisImgG;
+			}
 			userImage2.enabled = true;
 			mttt.app.gvc.resetGame();
 		});
-		userImage2.addEventListener('click',function() {
+		//userImage 1 == kreuz
+		userImage2.addEventListener('click', function() {
 			this.enabled = false;
-			settings.player2.image = mttt.config.kreuzImg;
-			settings.player2.image_win = mttt.config.kreuzImgG;
-			settings.player1.image = mttt.config.kreisImg;
-			settings.player1.image_win = mttt.config.kreisImgG;
+			if (player1Button.enabled == true) {
+				settings.player1.image = mttt.config.kreuzImg;
+				settings.player1.image_win = mttt.config.kreuzImgG;
+				settings.player2.image = mttt.config.kreisImg;
+				settings.player2.image_win = mttt.config.kreisImgG;
+			} else {
+				settings.player1.image = mttt.config.kreisImg;
+				settings.player1.image_win = mttt.config.kreisImgG;
+				settings.player2.image = mttt.config.kreuzImg;
+				settings.player2.image_win = mttt.config.kreuzImgG;
+			}
 			userImage1.enabled = true;
 			mttt.app.gvc.resetGame();
 		});
-		player1Button.addEventListener('click',function() {
+		player1Button.addEventListener('click', function() {
 			this.enabled = false;
 			settings.player1.begin = true;
 			settings.player2.begin = false;
 			player2Button.enabled = true;
 			mttt.app.gvc.resetGame();
 		});
-		player2Button.addEventListener('click',function() {
+		player2Button.addEventListener('click', function() {
 			this.enabled = false;
 			settings.player2.begin = true;
 			settings.player1.begin = false;
