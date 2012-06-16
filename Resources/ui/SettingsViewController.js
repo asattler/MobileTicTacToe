@@ -162,34 +162,39 @@ Ti.API.info('Including SettingsViewController.js');
 			singleButton.enabled = true;
 			settings.player1.name = "player 1";
 			settings.player2.name = "player 2";
+			mttt.app.gvc.resetGame();
 		});
 		userImage1.addEventListener('click',function() {
 			this.enabled = false;
-			settings.player1.image = mttt.config.kreisImg;
-			settings.player1.image_win = mttt.config.kreisImgG;
-			settings.player2.image = mttt.config.kreuzImg;
-			settings.player2.image_win = mttt.config.kreuzImgG;
+			settings.player1.image = mttt.config.kreuzImg;
+			settings.player1.image_win = mttt.config.kreuzImgG;
+			settings.player2.image = mttt.config.kreisImg;
+			settings.player2.image_win = mttt.config.kreisImgG;
 			userImage2.enabled = true;
+			mttt.app.gvc.resetGame();
 		});
 		userImage2.addEventListener('click',function() {
 			this.enabled = false;
-			settings.player2.image = mttt.config.kreisImg;
-			settings.player2.image_win = mttt.config.kreisImgG;
-			settings.player1.image = mttt.config.kreuzImg;
-			settings.player1.image_win = mttt.config.kreuzImgG;
+			settings.player2.image = mttt.config.kreuzImg;
+			settings.player2.image_win = mttt.config.kreuzImgG;
+			settings.player1.image = mttt.config.kreisImg;
+			settings.player1.image_win = mttt.config.kreisImgG;
 			userImage1.enabled = true;
+			mttt.app.gvc.resetGame();
 		});
 		player1Button.addEventListener('click',function() {
 			this.enabled = false;
 			settings.player1.begin = true;
 			settings.player2.begin = false;
 			player2Button.enabled = true;
+			mttt.app.gvc.resetGame();
 		});
 		player2Button.addEventListener('click',function() {
 			this.enabled = false;
 			settings.player2.begin = true;
 			settings.player1.begin = false;
 			player1Button.enabled = true;
+			mttt.app.gvc.resetGame();
 		});
 
 		// Add to the parent view.

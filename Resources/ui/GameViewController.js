@@ -6,16 +6,19 @@ Ti.API.info('Including GameViewController.js');
 	
 	var initPlayers = function(){
 		var settings = mttt.app.svc.settings;
+		var player1 = settings.player1;
+		var player2 = settings.player2;
+		
 		PlayerOne = {
-			name  : settings.player1.begin?settings.player1.name:settings.player2.name,
-	        image : settings.player1.begin?settings.player1.image:settings.player2.image,
-			image_win   : settings.player1.begin?settings.player1.image_win:settings.player2.image_win,
+			name  : player1.begin?player1.name:player2.name,
+	        image : player1.begin?player1.image:player2.image,
+			image_win   : player1.begin?player1.image_win:player2.image_win,
 		};
 		
 		PlayerTwo = {
-			name  : settings.player1.begin?settings.player2.name:settings.player1.name,
-	        image : settings.player1.begin?settings.player2.image:settings.player1.image,
-			image_win   : settings.player1.begin?settings.player2.image_win:settings.player1.image_win,
+			name  : player1.begin?player2.name:player1.name,
+	        image : player1.begin?player2.image:player1.image,
+			image_win   : player1.begin?player2.image_win:player1.image_win,
 		};
 	}
 	var attachToTab = function(_tab) {
@@ -55,48 +58,80 @@ Ti.API.info('Including GameViewController.js');
 		
 		var gvc = mttt.app.gvc || options.gvc;
 		
+		// mark button as owned by player
 		allocateButtonWithCurrentPlayer(index,gvc);
-
+		
+		// check if player won
 		var win = checkForWin(gvc);
 		if(win != null){
 			gameEnd(win);
-		}else {
-			changeCurrentPlayer(gvc);
-			prepareNextTurn(gvc);	
+			return;
 		}
 		
+		changeCurrentPlayer(gvc);
+		prepareNextTurn(gvc);
+		
+		// game is over after move 9
 		if(gvc.turn > 8){
 			gameEnd(null);	
+			return;
 		}
 		
+		// cpu as player
 		if(mttt.app.svc.settings.mode=='single' && gvc.currentPlayer.name == 'cpu'){
-			var btn = checkForWinningChance(gvc);
-			if(btn){
-				// press button to win or to prevent losing
-				pressButton(btn);
+			var chances = checkForWinningChances(gvc);
+			// no chances, press first empty field
+			if(chances.length==0){
+				pressNextEmptyField(gvc);
+				return;
 			}
-			else{
-				var lines = gvc.lines;
-				var btns = gvc.buttons;
-				// press first empty field
-				for(x=0;x < lines.length; x++){
-					var index1 = lines[x][0];
-					var index2 = lines[x][1];
-					var index3 = lines[x][2];
 			
-					if(btns[index1-1].owner == null){
-						pressButton(btns[index1-1]);
-						break;
-					}else if(btns[index2-1].owner == null){
-						pressButton(btns[index2-1]);
-						break;
-					}else if(btns[index3-1].owner == null){
-						pressButton(btns[index3-1]);
-						break;
-					}
+			// check winning chances
+			for(var i=0;i<chances.length;i++){
+				var chance = chances[i];
+				if(chance.win){
+					pressButton(chance.emptyBtn);
+					return;
 				}
 			}
+			// press first empty button to prevent to lose
+			pressButton(chances[0].emptyBtn);
 		}
+	}
+	
+	/*
+	 * Iterates over all lines.
+	 * Callback should be something like "function(btn1,btn2,btn3,line){}",
+	 * where btn1 is the first button of the line, btn2 the second and btn3 the third.
+	 * "line" is an array of btn indexes.
+	 */
+	var eachLine = function(gvc,callback){
+		var lines = gvc.lines;
+		var btns = gvc.buttons;
+
+		for(x=0;x < lines.length; x++){
+			callback(btns[lines[x][0]-1],btns[lines[x][1]-1],btns[lines[x][2]-1],lines[x]);
+		}
+	}
+	
+	var pressNextEmptyField = function(gvc){
+		var buttonPressed = false;
+		
+		eachLine(gvc,function(first,second,third){
+			if(buttonPressed)return;
+			
+			if(first.owner == null){
+				pressButton(first);
+				buttonPressed = true;
+			}else if(second.owner == null){
+				pressButton(second);
+				buttonPressed = true;
+			}else if(third.owner == null){
+				pressButton(third);
+				buttonPressed = true;
+			}
+		});
+			
 	}
 	
 	var pressButton = function(btn){
@@ -105,27 +140,30 @@ Ti.API.info('Including GameViewController.js');
 		}
 	}
 	
-	var checkForWinningChance = function(gvc){
+	/*
+	 * Gets the chances to win a game.
+	 * A chance object: {emptyBtn,forWin}.
+	 * Where "emptyBtn" is the button to press to win or prevent losing,
+	 * and "forWin" is true, if the current user could 
+	 * win this game by pressing the empty button.
+	 * 
+	 * return the list of chance
+	 */
+	var checkForWinningChances = function(gvc){
+		var chances = [];
 		var currentPlayer = gvc.currentPlayer;
-		var lines = gvc.lines;
-		var btns = gvc.buttons;
-		var x;
-		for(x=0;x < lines.length; x++){
-			var index1 = lines[x][0];
-			var index2 = lines[x][1];
-			var index3 = lines[x][2];
-			
-			if(btns[index1-1].owner!=null && btns[index2-1].owner!=null && btns[index1-1].owner.name == btns[index2-1].owner.name && btns[index3-1].owner == null){
-				return btns[index3-1];
+		eachLine(gvc,function(first,second,third){
+			if(first.owner!=null && second.owner!=null && first.owner.name == second.owner.name && third.owner == null){
+				chances.push({emptyBtn:third,forWin:first.owner.name==currentPlayer.name});
 			}
-			else if(btns[index1-1].owner!=null && btns[index3-1].owner!=null && btns[index1-1].owner.name == btns[index3-1].owner.name && btns[index2-1].owner == null){
-				return btns[index2-1];
+			else if(first.owner!=null && third.owner!=null && first.owner.name == third.owner.name && second.owner == null){
+				chances.push({emptyBtn:second,forWin:first.owner.name==currentPlayer.name});
 			}
-			else if(btns[index3-1].owner!=null && btns[index2-1].owner!=null && btns[index2-1].owner.name == btns[index3-1].owner.name && btns[index1-1].owner == null){
-				return btns[index1-1];
+			else if(third.owner!=null && second.owner!=null && second.owner.name == third.owner.name && first.owner == null){
+				chances.push({emptyBtn:first,forWin:third.owner.name==currentPlayer.name});
 			}
-		}
-		return null;
+		});
+		return chances;
 	}
 	
 	var gameEnd = function(win){
@@ -150,7 +188,6 @@ Ti.API.info('Including GameViewController.js');
 		    alert(winner?winner.name+" WINS":"DRAW");
 		    resetGame();
 		}, 2000);
-		
 	}
 	
 	var setStatusText = function(text,gvc){
@@ -158,26 +195,23 @@ Ti.API.info('Including GameViewController.js');
 	};
 	
 	var checkForWin = function(gvc){
-		var lines = gvc.lines;
-		var btns = gvc.buttons;
-		var x;
-		for(x=0;x < lines.length; x++){
-			var index1 = lines[x][0];
-			var index2 = lines[x][1];
-			var index3 = lines[x][2];
-			if(btns[index1-1].owner == null || btns[index2-1].owner == null || btns[index3-1].owner == null){ 
-				continue;
+		var win = null;
+		eachLine(gvc,function(first,second,third,line){
+			if(first.owner == null || second.owner == null || third.owner == null){ 
+				return;
 			}
-			if(btns[index1-1].owner.name == btns[index2-1].owner.name && btns[index2-1].owner.name == btns[index3-1].owner.name){
-				return {line:lines[x], winner:btns[index1-1].owner};
+			if(first.owner.name == second.owner.name && second.owner.name == third.owner.name){
+				win = {line:line, winner:first.owner};
 			}
-		}
-		return null;		
+		});
+		return win;
 	}
 	
 	var resetGame = function(options){
 		var gvc = mttt.app.gvc || options.gvc;
 		gvc.turn = 0;
+		
+		initPlayers();
 		
 		for (var i=0;i < gvc.buttons.length;i++){
 			var btn = gvc.buttons[i];
@@ -186,10 +220,9 @@ Ti.API.info('Including GameViewController.js');
 			btn.enabled = true;
 			btn.owner = null;
 		}
+		
 		gvc.currentPlayer = PlayerOne;
 		setPlayerTurnText(gvc.currentPlayer,gvc);
-		
-		initPlayers();
 		
 		// KI
 		if(mttt.app.svc.settings.mode=='single' && PlayerOne.name == 'cpu'){
@@ -198,12 +231,10 @@ Ti.API.info('Including GameViewController.js');
 	}
 	
 	var setPlayerTurnText = function(player,gvc){
-		setStatusText(player.name+"S TURN",gvc);
+		setStatusText(player.name+"s turn",gvc);
 	}
 	
   	mttt.ui.createGameViewController = function(_args) {
-  		initPlayers();
-  		
   		var gvc = {};
   		var buttons = [];
   		var lines = [];
@@ -261,7 +292,6 @@ Ti.API.info('Including GameViewController.js');
 		
 		view.add(endLabel);
 		
-//		var label = Ti.UI.createLabel({text:_args});
 		gvc.lines = lines;
 		gvc.buttons = buttons;
 		gvc.endLabel = endLabel;
