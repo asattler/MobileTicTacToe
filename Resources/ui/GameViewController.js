@@ -290,6 +290,18 @@ Ti.API.info('Including GameViewController.js');
 			textAlign : 'center'
 		});
 		
+		var resetBtn = Ti.UI.createButton({
+			title : 'reset',
+			width: mttt.config.buttonWidth,
+			height: mttt.config.buttonHeight,
+			left: 130,
+			bottom: 30
+		});
+		
+		resetBtn.addEventListener('click', function(e) {
+			mttt.app.gvc.resetGame();
+		});
+				
 		view.add(endLabel);
 		
 		gvc.lines = lines;
@@ -299,6 +311,8 @@ Ti.API.info('Including GameViewController.js');
 		gvc.resetGame = resetGame;
 		
 		resetGame({gvc:gvc});		
+		
+		view.add(resetBtn);
 		
 	    return gvc;
 	};
