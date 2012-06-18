@@ -77,6 +77,7 @@ Ti.API.info('Including ui.js');
 
 //Include additional namespaces
 Ti.include(
+	'MapViewController.js',
 	'SettingsViewController.js',
 	'GameViewController.js'
 );
