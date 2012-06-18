@@ -20,14 +20,27 @@ Ti.API.info('Including SettingsViewController.js');
 		
 		var mapview = Titanium.Map.createView({
             mapType: Titanium.Map.STANDARD_TYPE,
-            region: {latitude: 49.0, 
-            longitude: 52.0, 
+            region: {latitude: 52.585294, 
+            longitude: 13.300105, 
             latitudeDelta:0.01, 
             longitudeDelta:0.01},
             animate:true,
             regionFit:true,
             userLocation:true,
         });
+
+		var myAnnotation = Titanium.Map.createAnnotation({
+			draggable : false,
+			latitude : 52.585294,
+			longitude : 13.300105,
+		});
+		
+		//click-event is not supported for annotations on android...
+		mapview.addEventListener("click", function(e){
+			alert("play with me");
+		})
+
+		mapview.addAnnotation(myAnnotation);
 
 		view.add(mapview);
 		
