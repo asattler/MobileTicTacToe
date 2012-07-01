@@ -15,5 +15,6 @@ var mttt = {};
 Ti.include(
 	'/config/config.js',
 	'/ui/ui.js',
-	'/model/model.js'
+	'/model/model.js',
+	'/GameServerProxy.js'
 );

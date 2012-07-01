@@ -21,3 +21,4 @@ mttt.app.gvc = mttt.ui.createGameViewController();
 mttt.app.gvc.resetGame();
 mttt.app.gvc.attachToTab(mttt.app.tabGroup.tabs[0]);
 
+mttt.app.gsp = mttt.app.createGameServerProxy();

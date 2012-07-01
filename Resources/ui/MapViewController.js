@@ -1,4 +1,4 @@
-Ti.API.info('Including SettingsViewController.js');
+Ti.API.info('Including MapViewController.js');
 
 (function() {
 	var attachToTab = function(_tab) {
@@ -16,23 +16,18 @@ Ti.API.info('Including SettingsViewController.js');
 	
 	var mapview;
 	
-	var createUserAnnotationsOnMap = function(userlist){
-		for(var i=0;i<userlist.length;i++){
-			var user = userlist[i];
-			// user.status;
-			// user.id;
-			var annotation = Titanium.Map.createAnnotation({
-				draggable : false,
-				pincolor : Titanium.Map.ANNOTATION_RED,
-				latitude : user.lat,
-				longitude : user.lon,
-				title : user.nickname,
-				subtitle : "Score 12",
-				leftButton : "/images/play.png",
-				rightButton : "/images/next.png",
-			});
-			mapview.addAnnotation(annotation);
-		}
+	var createUserAnnotationOnMap = function(user){
+		var annotation = Titanium.Map.createAnnotation({
+			draggable : false,
+			pincolor : Titanium.Map.ANNOTATION_RED,
+			latitude : user.lat,
+			longitude : user.lon,
+			title : user.nickname,
+			subtitle : "Score 12",
+			leftButton : "/images/play.png",
+			rightButton : "/images/next.png",
+		});
+		mapview.addAnnotation(annotation);
 	}
 
 	mttt.ui.createMapViewController = function(_args) {
@@ -53,39 +48,6 @@ Ti.API.info('Including SettingsViewController.js');
     		visible: true,
         });
 		
-		var socket = Ti.Network.Socket.createTCP({
-			host: 'www.czichos.net',port: 8080,
-			connected: function(e){
-				Titanium.Geolocation.getCurrentPosition(function(e){
-					if(e.error){
-						alert('error get current pos');
-						return;
-					}
-					
-					var lon = e.coords.longitude;
-					var lat = e.coords.latitude;
-					
-					Ti.Stream.write(socket,Ti.createBuffer({value: 'msg=position;lat='+lat+';lon='+lon+';nickname=geistMario;'}),function(data){});
-				})
-				Ti.Stream.pump(e.socket,function(obj){
-					
-					var data = eval('('+obj.buffer+') ');
-					alert(data.users)
-					if(data.users){
-						createUserAnnotationsOnMap(data.users)
-					}
-				}, 1024, true);
-				Ti.Stream.write(socket,Ti.createBuffer({
-					value: 'msg=userlist'
-				}),function(data){
-				});
-			
-			}
-		})
-		
-		socket.connect();
-		
-		
 		//click-event is not supported for annotations on android...
 		mapview.addEventListener("click", function(e){
 			//alert(e.clicksource);
@@ -105,7 +67,7 @@ Ti.API.info('Including SettingsViewController.js');
 		mvc.mapview = mapview;
 		mvc.view = view;
 		mvc.attachToTab = attachToTab;
-		
+		mvc.createUserAnnotationOnMap = createUserAnnotationOnMap;
 		return mvc;
 	}
 })();

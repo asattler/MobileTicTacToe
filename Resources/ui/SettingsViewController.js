@@ -31,7 +31,9 @@ Ti.API.info('Including SettingsViewController.js');
 				image_win : mttt.config.kreisImgG,
 				begin : false,
 				name : 'player 2'
-			}
+			},
+			nickname : 'anonym user',
+			server : 'www.czichos.net:8080'
 		};
 
 		var singleButton = Ti.UI.createButton({
@@ -123,7 +125,8 @@ Ti.API.info('Including SettingsViewController.js');
 			softKeyboardOnFocus : Ti.UI.Android.SOFT_KEYBOARD_DEFAULT_ON_FOCUS, // Android only
 			keyboardType : Ti.UI.KEYBOARD_DEFAULT,
 			returnKeyType : Ti.UI.RETURNKEY_DEFAULT,
-			borderStyle : Ti.UI.INPUT_BORDERSTYLE_ROUNDED
+			borderStyle : Ti.UI.INPUT_BORDERSTYLE_ROUNDED,
+			value : settings.server
 		});
 
 		var nicknameText = Ti.UI.createTextField({
@@ -134,8 +137,14 @@ Ti.API.info('Including SettingsViewController.js');
 			softKeyboardOnFocus : Ti.UI.Android.SOFT_KEYBOARD_DEFAULT_ON_FOCUS, // Android only
 			keyboardType : Ti.UI.KEYBOARD_DEFAULT,
 			returnKeyType : Ti.UI.RETURNKEY_DEFAULT,
-			borderStyle : Ti.UI.INPUT_BORDERSTYLE_ROUNDED
+			borderStyle : Ti.UI.INPUT_BORDERSTYLE_ROUNDED,
+			value : settings.nickname
 		});
+		
+		nicknameText.addEventListener('blur',function(){
+			settings.nickname = nicknameText.value;
+			mttt.app.gsp.publishPosition();
+		})
 
 		singleButton.addEventListener('click', function() {
 			this.enabled = false;
@@ -227,7 +236,6 @@ Ti.API.info('Including SettingsViewController.js');
 		svc.view = view;
 		svc.attachToTab = attachToTab;
 		svc.settings = settings;
-		Ti.API.info(settings);
 		return svc;
 	}
 })();
