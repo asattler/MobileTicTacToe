@@ -12,13 +12,22 @@ Ti.API.info('Including GameServerProxy.js');
 		Ti.API.info("get userlist");
 	}
 	
+	var userId;
+	
 	var pumpCallback = function(obj){
 		var data = eval('('+obj.buffer+') ');
 		if(data.users){
 			for(var i=0;i<data.users.length;i++){
 				var user = data.users[i];
-				if(user.nickname && user.lat && user.lon){
+				if(user.nickname && user.lat && user.lon && user.id !== userId){
 					mttt.app.mvc.createUserAnnotationOnMap(user)
+				}
+			}
+		}
+		else if(data.msg){
+			if(data.msg === 'loginInfo'){
+				if(data.id){
+					userId = data.id;
 				}
 			}
 		}
@@ -45,6 +54,13 @@ Ti.API.info('Including GameServerProxy.js');
 		Ti.API.info(isConnected());
 		if(!isConnected()){
 			socket.connect();
+		}
+	}
+	
+	var login = function(){
+		var data = {value: 'msg=login'};
+		if(isConnected()){
+			Ti.Stream.write(socket.Ti.createBuffer(data), function(data){});
 		}
 	}
 	
